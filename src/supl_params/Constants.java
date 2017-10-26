@@ -38,6 +38,8 @@ public class Constants {
         public static final String cmd_remount = " remount ";
         public static final String cmd_push = " push ";
         public static final String cmd_waitForDevice = " wait-for-device";
+        public static final String cmd_killServer = " kill-server ";
+        public static final String cmd_startServer = " start-server ";
         
         
         public static final String gpsConfFile = "gps.conf";
@@ -45,7 +47,14 @@ public class Constants {
         
         
         public static final String msg_NoDevicesConnected = "No devices connected to computer";
+        public static final String msg_ManyDevicesConnected = "More than one device connected to computer. "
+                + "\nPlease connect only the device that you need to modify gps file. \n It will be very quick.";
         
+    }
+    
+    public class PopUpMsgs{
+        public static final String chooseDevice = "There are more than one device connected. In which one do you want to modify gps.conf file?";
+        public static final String defaultDevChosen = "Device to be used: ";
     }
     
 }

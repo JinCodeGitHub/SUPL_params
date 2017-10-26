@@ -5,7 +5,6 @@
  */
 package supl_params;
 
-//import com.sun.xml.internal.bind.v2.TODO;
 import java.awt.List;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class AdbStuff {
             e.printStackTrace();
         }
         
-        // TODO: Kill existing adb processes before use adb again
+        executeCommand(Constants.Adb.cmd_killServer);
     }
     public void executeCommand(String cmd) {
         ArrayList<String> lstError = new ArrayList<>();
@@ -43,12 +42,12 @@ public class AdbStuff {
             process.waitFor();
 
             InputStream error = process.getErrorStream();
-            lstError = InputStreamToString(error, "CMD ERROR: ");
-            Log.d(lstError);
+            lstError = InputStreamToString(error);
+            Log.d(lstError, "CMD ERROR: ");
 
             InputStream input = process.getInputStream();
-            lstInput = InputStreamToString(input, "CMD INPUT: ");
-            Log.d(lstInput);
+            lstInput = InputStreamToString(input);
+            Log.d(lstInput, "CMD INPUT: ");
         } catch (IOException e){
             e.printStackTrace();
         }catch ( InterruptedException ie) {
@@ -76,8 +75,8 @@ public class AdbStuff {
             BufferedReader in = new BufferedReader(new InputStreamReader(stream));
             String line = null;            
             while ((line = in.readLine()) != null) {
-                if(!line.isEmpty() && line!=null)
-                    lstLines.add(prefix + " - " + line);
+                if(!line.isEmpty())
+                    lstLines.add(prefix + line);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -88,8 +87,11 @@ public class AdbStuff {
     
     public boolean getGpsConfFile(){
         Log.d("Starting getGpsConFile");
-        if(!existAvailableDevices())
+        if(!existAvailableDevices("Pull file from which device?")){
+            Log.d("You have no devices connected or \nyou have more than one device connected and need to choose one");
+            PopUp.showInfoMessage("You have no devices connected or \nyou have more than one device connected and need to choose one");
             return false;
+        }
         
         executeCommand(Constants.Adb.cmd_pull + Constants.Adb.gpsSystemPath + Constants.Adb.gpsConfFile);
         
@@ -102,39 +104,123 @@ public class AdbStuff {
         return result;        
     }
     
-    private boolean existAvailableDevices(){
+    private boolean existAvailableDevices(String title){
         executeCommand(Constants.Adb.cmd_devices);
-        Log.d("Number of available devices: " + (lstCmdOutput.size() - 1));
-        if(lstCmdOutput.size() == 1){
+        int num = getNumberOfDevicesAvailable();
+        Log.d("Number of available devices: " + (num - 1));
+        if(num == 0){
             PopUp.showWarning(Constants.Adb.msg_NoDevicesConnected);
             return false;
         }
         
-        // TODO: Do something when there are more than 1 device connected
+        if(num >= 2){
+            String chosenDevice = PopUp.askDeviceToUse(getListOfAvailableDevices(), title);
+            if(Utils.isNullOrEmptyString(chosenDevice))
+                return false;
+            //change adbCmdPrefix
+            adbCmdPrefix = Constants.getCurrPath() + "\\" + "adbT.exe -s " + chosenDevice + " ";
+        }else{
+            adbCmdPrefix = Constants.getCurrPath() + "\\" + "adbT.exe ";
+        }
         
         return true;
     }
     
-    public void pushGpsConfFile(){
+    private int getNumberOfDevicesAvailable(){
+        int num = 0;
+        for(String line : lstCmdOutput){
+            if(line.contains("device") && !line.contains("List of devices attached"))
+                num++;
+        }
+        return num;
+    }
+    
+    private Object[] getListOfAvailableDevices(){
+        ArrayList<String> allDevices = new ArrayList<>();
+        
+        for(String line : lstCmdOutput){
+            if(line.contains("device") && !line.contains("List of devices attached"))
+                allDevices.add(line.substring(0, line.indexOf("device")).trim());
+        }
+        return allDevices.toArray();
+    }
+    
+    public boolean pushGpsConfFile(){
         Log.d("Starting pushGpsConfFile");
-        if(!existAvailableDevices())
-            return;
+        if(!existAvailableDevices("Push file into which device?"))
+            return false;
         
         executeCommand(Constants.Adb.cmd_waitForDevice + Constants.Adb.cmd_root);
-        executeCommand(Constants.Adb.cmd_waitForDevice + Constants.Adb.cmd_disVerity);
-        executeCommand(Constants.Adb.cmd_waitForDevice);
-        executeCommand(Constants.Adb.cmd_reboot);
-        executeCommand(Constants.Adb.cmd_waitForDevice);
-        executeCommand(Constants.Adb.cmd_root);
-        executeCommand(Constants.Adb.cmd_waitForDevice);
-        executeCommand(Constants.Adb.cmd_remount);
-        executeCommand(Constants.Adb.cmd_waitForDevice);
-        executeCommand(Constants.Adb.cmd_push + Constants.Adb.gpsSystemPath + Constants.Adb.gpsConfFile);
+        if(!checkError(Constants.Adb.cmd_waitForDevice + Constants.Adb.cmd_root)) return false;
         
+        executeCommand(Constants.Adb.cmd_waitForDevice + Constants.Adb.cmd_disVerity);
+        if(!checkError(Constants.Adb.cmd_waitForDevice + Constants.Adb.cmd_disVerity)) return false;
+        
+        executeCommand(Constants.Adb.cmd_waitForDevice);
+        if(!checkError(Constants.Adb.cmd_waitForDevice)) return false;
+        
+        executeCommand(Constants.Adb.cmd_reboot);
+        if(!checkError(Constants.Adb.cmd_reboot)) return false;
+        
+        executeCommand(Constants.Adb.cmd_waitForDevice);
+        if(!checkError(Constants.Adb.cmd_waitForDevice)) return false;
+        
+        executeCommand(Constants.Adb.cmd_root);
+        if(!checkError(Constants.Adb.cmd_root)) return false;
+        
+        executeCommand(Constants.Adb.cmd_waitForDevice);
+        if(!checkError(Constants.Adb.cmd_waitForDevice)) return false;
+        
+        executeCommand(Constants.Adb.cmd_remount);
+        if(!checkError(Constants.Adb.cmd_remount)) return false;
+        
+        executeCommand(Constants.Adb.cmd_waitForDevice);
+        if(!checkError(Constants.Adb.cmd_waitForDevice)) return false;
+        
+        executeCommand(Constants.Adb.cmd_push+ " " + Constants.getCurrPath() + "\\" + Constants.Adb.gpsConfFile + " " + Constants.Adb.gpsSystemPath);
+        if(!checkError(Constants.Adb.cmd_push+ " " + Constants.getCurrPath() + "\\" + Constants.Adb.gpsConfFile + " " + Constants.Adb.gpsSystemPath)) return false;
+                
+        return true;
+    }
+    
+    private boolean checkError(String cmd){
+        Log.d("Check error");
+                
+        for(String error : lstCmdOutput)
+            if(!checkErrorLine(error, cmd)) return false;
+        
+        
+        for(String error : lstCmdError)
+            if(!checkErrorLine(error, cmd)) return false;
+        
+        return true;
+    }
+    
+    private boolean checkErrorLine(String error, String cmd){
+        Log.d("ERROR: " + error);
+        if(error.contains("Not running as root.") || error.contains("Try \"adb root\" first.")){
+            Log.d("Trying to fix error");
+            executeCommand(Constants.Adb.cmd_root);
+            return true;
+        }
+        if(error.contains("adb: error: failed to copy") || error.contains("remote Read-only file system")){
+            PopUp.showWarning("Failed to push gps.con into the device");
+            return false;
+        }
+        if(error.contains("error: device") && error.contains("not found")){
+            executeCommand(Constants.Adb.cmd_killServer);
+            executeCommand(Constants.Adb.cmd_startServer);
+            executeCommand(cmd);
+            return true;
+        }
+        return true;
     }
     
     // TODO: Função para checar erros comuns do output do executeCommand
     // Versão velha
     // Disable verity
     // Remount não funcionou
+    
+    // TODO: Depois do remount precisa reiniciar?
+    // TODO: Checar: if(disable verity is already on) skip reboot;
 }

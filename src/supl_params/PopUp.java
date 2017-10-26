@@ -5,6 +5,7 @@
  */
 package supl_params;
 
+import javax.swing.Icon;
 import javax.swing.JOptionPane;
 
 /**
@@ -13,6 +14,14 @@ import javax.swing.JOptionPane;
  */
 public class PopUp {
     public static void showWarning(String strMsg){
-        JOptionPane.showMessageDialog(null, strMsg, "Wrong input parameter?", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(null, strMsg, "", JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public static String askDeviceToUse(Object[] possibilities, String title){
+        return (String)JOptionPane.showInputDialog(null, Constants.PopUpMsgs.chooseDevice, title, JOptionPane.QUESTION_MESSAGE, null, possibilities, "");
+    }
+    
+    public static void showInfoMessage(String strMsg){
+        JOptionPane.showMessageDialog(null, strMsg, "", JOptionPane.INFORMATION_MESSAGE);
     }
 }

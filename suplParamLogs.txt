@@ -1,0 +1,22 @@
+2017-10-26 06:32:32.779[AdbStuff.java:executeCommand:40]COMMAND: C:\Users\marina.siqueira\Documents\SUPL_params\adbT.exe  kill-server 
+2017-10-26 06:32:32.888[AdbStuff.java:getGpsConfFile:89]Starting getGpsConFile
+2017-10-26 06:32:32.888[AdbStuff.java:executeCommand:40]COMMAND: C:\Users\marina.siqueira\Documents\SUPL_params\adbT.exe  devices 
+2017-10-26 06:32:37.100[AdbStuff.java:executeCommand:50]CMD INPUT:  List of devices attached
+2017-10-26 06:32:37.100[AdbStuff.java:executeCommand:50]CMD INPUT:  * daemon not running. starting it now at tcp:5037 *
+2017-10-26 06:32:37.100[AdbStuff.java:executeCommand:50]CMD INPUT:  * daemon started successfully *
+2017-10-26 06:32:37.100[AdbStuff.java:executeCommand:50]CMD INPUT:  LGM700471f93a	device
+2017-10-26 06:32:37.100[AdbStuff.java:executeCommand:50]CMD INPUT:  LGK350RWE6PVS8	device
+2017-10-26 06:32:37.104[AdbStuff.java:existAvailableDevices:110]Number of available devices: 1
+2017-10-26 06:32:39.703[AdbStuff.java:executeCommand:40]COMMAND: C:\Users\marina.siqueira\Documents\SUPL_params\adbT.exe -s LGM700471f93a  pull system/etc/gps.conf
+2017-10-26 06:32:39.819[AdbStuff.java:executeCommand:50]CMD INPUT:  [100%] system/etc/gps.conf
+2017-10-26 06:32:39.819[AdbStuff.java:executeCommand:50]CMD INPUT:  system/etc/gps.conf: 1 file pulled. 1.9 MB/s (9873 bytes in 0.005s)
+2017-10-26 06:32:39.820[ReadWriteGPSFile.java:existFile:190]File C:\Users\marina.siqueira\Documents\SUPL_params\gps.conf exists: true
+2017-10-26 06:32:39.820[AdbStuff.java:getGpsConfFile:100]gps.conf file pulled successfully
+2017-10-26 06:32:39.830[Utils.java:getOperatorMarker:147]216_70=
+2017-10-26 06:32:39.830[SUPL_ui.java:btn_checkValuesActionPerformed:359]strMarker: 216_70=
+2017-10-26 06:32:39.830[ReadWriteGPSFile.java:getGpsConfValuesFromFile:227]initiating getGpsConfValuesFromFile
+2017-10-26 06:32:39.831[ReadWriteGPSFile.java:getGpsConfValuesFromFile:240]line to get value = SUPL_HOST_216_70=supl.funciona.com
+2017-10-26 06:32:39.831[ReadWriteGPSFile.java:getGpsConfValuesFromFile:240]line to get value = SUPL_PORT_216_70=7275
+2017-10-26 06:32:39.831[ReadWriteGPSFile.java:getGpsConfValuesFromFile:240]line to get value = LGE_TLS_MODE_216_70=3
+2017-10-26 06:32:39.831[ReadWriteGPSFile.java:writeFile:62]Initiating writeFile
+2017-10-26 06:32:39.833[ReadWriteGPSFile.java:writeFile:67]Path: C:\Users\marina.siqueira\Documents\SUPL_params\suplParamLogs.txt

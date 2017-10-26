@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import supl_params.Constants;
 
@@ -62,7 +63,7 @@ public class ReadWriteGPSFile {
         // The name of the file to open.
         
         try {
-            FileWriter fileWriter = new FileWriter(filePath);
+            FileWriter fileWriter = new FileWriter(filePath, false);
             Log.d("Path: " + filePath);
 
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
@@ -139,77 +140,47 @@ public class ReadWriteGPSFile {
         //String line = "";
         String newLine = "";
         String newLineAux = "";
+        boolean isValuesChanged = false;
                        
-        try{
-            for(String line : allLines){
-                if(line.contains(strMarker)){
-                    System.out.println("line to update = " + line);
-                    newLine = line.substring(0, line.indexOf(strMarker));
-                    System.out.println("indexOf strMarker = " + line.indexOf(strMarker));
-                    System.out.println("newLine = " + newLine);
+        for(String line : allLines){
+            if(line.contains(strMarker)){
+
+                newLine = line.substring(0, line.indexOf(strMarker));
+
+                if(dictionary.containsKey(newLine)){
+                    Log.d("line to update = " + line);
+                    Log.d("newLine: " + newLine);
                     switch(newLine){
                         case Constants.SUPL_VER:
                             newLineAux = dictionary.get(Constants.SUPL_VER);
-                            System.out.println("case " + Constants.SUPL_VER + " - newLineAux: " + newLineAux);
                             break;
                         case Constants.SUPL_HOST:
                             newLineAux = dictionary.get(Constants.SUPL_HOST);
-                            System.out.println("case " + Constants.SUPL_HOST + " - newLineAux: " + newLineAux);
                             break;
                         case Constants.SUPL_PORT:
                             newLineAux = dictionary.get(Constants.SUPL_PORT);
-                            System.out.println("case " + Constants.SUPL_PORT + " - newLineAux: " + newLineAux);
                             break;
                         case Constants.TLS_MODE:
                             newLineAux = dictionary.get(Constants.TLS_MODE);
-                            System.out.println("case " + Constants.TLS_MODE + " - newLineAux: " + newLineAux);
                             break;
                         case Constants.POSITION_MODE:
                             newLineAux = dictionary.get(Constants.POSITION_MODE);
-                            System.out.println("case " + Constants.POSITION_MODE + " - newLineAux: " + newLineAux);
                             break;                            
                     }
-                    line = newLine + strMarker + "=" + newLineAux;
+                    line = newLine + strMarker + newLineAux;
+                    isValuesChanged = true;
                 }
-                finalText.add(line);
-                //finalText.append(System.getProperty("line.separator"));
             }
-            
-            return finalText;
-        }catch(Exception e){
-            e.printStackTrace();
+            finalText.add(line);
+            //finalText.append(System.getProperty("line.separator"));
         }
+
+        if(!isValuesChanged){
+            finalText.clear();
+            PopUp.showWarning("No value was modified because there isn't this combination of suffix+mcc+mnc in this file.");
+        }
+
         return finalText;
-    }
-    
-    
-    public static String readAndUpdateFile(String suffix, String mcc, String mnc){
-        //UNF_334_50
-        String strMarker = mcc + "_" + mnc;
-        if(!suffix.isEmpty())
-            strMarker = suffix + "_" + strMarker;
-            
-        String fileName = "C:\\Users\\Mirlei\\Downloads\\platform-tools-latest-windows\\platform-tools\\gps.conf";
-        String line = null;
-        StringBuilder allText = null;
-
-        try {
-            FileReader fileReader = new FileReader(fileName);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            while((line = bufferedReader.readLine()) != null) {
-                if(line.contains(line))
-                System.out.println(line);
-                allText.append(line);
-                allText.append(System.getProperty(Constants.LINESEPARATOR));
-            }   
-            bufferedReader.close();         
-        }
-        catch(IOException ex) {
-            System.out.println("Error reading file '" + fileName + "'");                  
-            ex.printStackTrace();
-        }
-        return allText.toString();
     }
     
     public static boolean existFile(String filePath){
@@ -249,6 +220,34 @@ public class ReadWriteGPSFile {
 		SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss-SSS");
 
 		return dayTime.format(new Date(time));
+    }
+    
+    
+    public static Map<String, String> getGpsConfValuesFromFile(ArrayList<String> allLines, String strMarker){
+        Log.d("initiating getGpsConfValuesFromFile");
+        String param = "";
+        String value = "";
+        Map<String, String> dic = new HashMap<>();
+        boolean hasValue = false;
+                       
+        for(String line : allLines){
+            if(line.contains(strMarker)){
+
+                param = line.substring(0, line.indexOf(strMarker));
+                value = line.substring(line.indexOf("=")+1);
+
+                if(Utils.isValidValue(param, new String[]{Constants.SUPL_VER, Constants.SUPL_HOST, Constants.SUPL_PORT, Constants.TLS_MODE, Constants.POSITION_MODE})){
+                    Log.d("line to get value = " + line);
+                    dic.put(param, value);
+                    hasValue = true;
+                }
+            }
+        }
+        
+        if(!hasValue)
+            PopUp.showWarning("There isn't this combination of suffix+mcc+mnc in this file.");
+            
+        return dic;
     }
     
 }

@@ -14,20 +14,32 @@ import java.util.Date;
  * @author marina.siqueira
  */
 public class Log {
+    public static ArrayList<String> logLinesToWrite;
+    static{
+        logLinesToWrite = new ArrayList<>();
+    }
+    
     public static void d(String strMsg) {
         Exception e = new Exception();
         StackTraceElement callerElement = e.getStackTrace()[1];
-        System.out.println(getCurrentTime() + "[" + callerElement.getFileName() + ":"
-                        + callerElement.getMethodName() + ":" + callerElement.getLineNumber() + "]" + strMsg);
-        
+        String line = getCurrentTime() + "[" + callerElement.getFileName() + ":"
+                        + callerElement.getMethodName() + ":" + callerElement.getLineNumber() + "]" + strMsg;
+        System.out.println(line);
+        logLinesToWrite.add(line);        
     }
     
     public static void d(ArrayList<String> lstMsg) {
+        d(lstMsg, "");
+    }
+    
+    public static void d(ArrayList<String> lstMsg, String prefixEachMsg) {
         Exception e = new Exception();
         StackTraceElement callerElement = e.getStackTrace()[1];
         for(int i=0; i < lstMsg.size(); i++){
-        System.out.println(getCurrentTime() + "[" + callerElement.getFileName() + ":"
-                        + callerElement.getMethodName() + ":" + callerElement.getLineNumber() + "]" + lstMsg.get(i));
+        String line = getCurrentTime() + "[" + callerElement.getFileName() + ":"
+                        + callerElement.getMethodName() + ":" + callerElement.getLineNumber() + "]" + prefixEachMsg + " " +lstMsg.get(i);
+        System.out.println(line);
+        logLinesToWrite.add(line); 
         }
     }
     
