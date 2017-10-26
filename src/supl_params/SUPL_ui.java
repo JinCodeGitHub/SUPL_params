@@ -229,7 +229,7 @@ public class SUPL_ui extends javax.swing.JFrame {
 
 // </editor-fold>
         
-        String errorMsg = "";//mUtils.checkInputParams(suffix, mcc, mnc, supl_ver, tls_mode, pos_mode);
+        String errorMsg = mUtils.checkInputParams(suffix, mcc, mnc, supl_ver, tls_mode, pos_mode, supl_server, supl_port);
         if(!errorMsg.equals("")){
             PopUp.showWarning(errorMsg);
             return;
